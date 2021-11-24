@@ -83,6 +83,18 @@ class Server
 
         array_push($this->handlers, $handler);
     }
+    
+    /**
+     * @param array $handlers
+     *
+     * @return $this
+     */
+    public function setHandlers(array $handlers = [])
+    {
+        $this->handlers = $handlers;
+
+        return $this;
+    }
 
     /**
      * Get request payload.
