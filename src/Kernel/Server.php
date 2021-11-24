@@ -41,16 +41,16 @@ class Server
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function serve()
+    public function serve($request)
     {
         foreach ($this->handlers as $handler) {
-            $handler->__invoke($this->getPayload());
+            $handler->__invoke($this->getPayload($request));
         }
 
         $this->app['logger']->debug('Request received: ', [
-            'method' => $this->app['request']->getMethod(),
-            'uri' => $this->app['request']->getUri(),
-            'content' => $this->app['request']->getContent(),
+            'method' => $request->getMethod(),
+            'uri' => $request->getUri(),
+            'content' => $request->getContent(),
         ]);
 
         return tap(new Response(
@@ -89,16 +89,16 @@ class Server
      *
      * @return array
      */
-    public function getPayload()
+    public function getPayload($request)
     {
-        $payload = json_decode($this->app['request']->getContent(), true);
+        $payload = $request->post();
 
         if (JSON_ERROR_NONE !== json_last_error()) {
             throw new RuntimeException('No payload received');
         }
 
         $result = $this->app['encryptor']->decrypt(
-            $payload['encrypt'], $this->app['request']->get('signature'), $this->app['request']->get('nonce'), $this->app['request']->get('timestamp')
+            $payload['encrypt'], $request->get('signature'), $request->get('nonce'), $request->get('timestamp')
         );
 
         return json_decode($result, true);
