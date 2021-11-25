@@ -85,6 +85,33 @@ class Server
     }
     
     /**
+     * add handler.
+     *
+     * @param \Closure|string|object $handler
+     * @param bool $repead
+     *
+     * @return void
+     *
+     * @throws \EasyDingTalk\Kernel\Exceptions\InvalidArgumentException
+     */
+    public function add($handler, $repead = false)
+    {
+        if (is_string($handler)) {
+            $handler = function ($payload) use ($handler) {
+                return (new $handler($this->app))->__invoke($payload);
+            };
+        }
+
+        if (!is_callable($handler)) {
+            throw new InvalidArgumentException('Invalid handler');
+        }
+
+        if ($repead || !in_array($handler, $this->handlers)) {
+            array_push($this->handlers, $handler);
+        }
+    }
+    
+    /**
      * @param array $handlers
      *
      * @return $this
