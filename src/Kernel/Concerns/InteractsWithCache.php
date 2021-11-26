@@ -32,8 +32,17 @@ trait InteractsWithCache
             return $this->cache;
         }
 
-        if (property_exists($this, 'app') && $this->app->offsetExists('cache') && ($this->app['cache'] instanceof CacheInterface)) {
-            return $this->cache = $this->app['cache'];
+//         if (property_exists($this, 'app') && $this->app->offsetExists('cache') && ($this->app['cache'] instanceof CacheInterface)) {
+//             return $this->cache = $this->app['cache'];
+//         }
+        
+        if (property_exists($this, 'app') && isset($this->app['cache'])) {
+            $this->cache = new Psr16Cache($this->app['cache']);
+
+            // Fix PHPStan error
+            assert($this->cache instanceof \Psr\SimpleCache\CacheInterface);
+
+            return $this->cache;
         }
 
         return $this->cache = $this->createDefaultCache();
